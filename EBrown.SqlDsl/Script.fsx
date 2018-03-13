@@ -12,7 +12,7 @@ open Types
 let query = {
     Query.Type = 
         Select { 
-            What = Columns [|Name (Raw "OrderId"); Name (Alias ("PoNumber", "PurchaseOrderNumber")); Name (Alias ("Customer", "CustomerName"))|]
+            What = Columns [|Name (Raw "OrderId"); Name (Alias (Name (Raw "PoNumber"), "PurchaseOrderNumber")); Name (Alias (Name (Raw "Customer"), "CustomerName"))|]
             Limit = None
             Group = None
             Sort = None
@@ -20,3 +20,9 @@ let query = {
     Table = Raw "OrderItems" }
 let queryStr = query |> Generation.query
 printfn "%s" queryStr
+
+let table = {
+    Table.Name = "OrderItems"
+    Columns = [|{ SqlColumn.Name = "ItemId"; Default = None; Type = Int; Nullable = false }|]
+    KeyColumns = [| |]
+    Relationships = [] }
