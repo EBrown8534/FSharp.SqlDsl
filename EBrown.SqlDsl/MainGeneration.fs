@@ -65,16 +65,16 @@ let printSort s = match s with | Ascending n -> sprintf "%s ASC" (n |> quoteName
 
 let joinTypeToString jt =
     match jt with
-        | Left -> "LEFT"
-        | Right -> "RIGHT"
-        | Outer -> "OUTER"
-        | Inner -> "INNER"
+    | Left -> "LEFT"
+    | Right -> "RIGHT"
+    | Outer -> "OUTER"
+    | Inner -> "INNER"
 
 let filterClauseToString fc = 
     match fc with
-        | Equal x -> sprintf "= %s" (printAliasName x)
-        | NotEqual x -> sprintf "!= %s" (printAliasName x)
-        | Between (x,y) -> sprintf "BETWEEN %s AND %s" (printAliasName x) (printAliasName y)
+    | Equal x -> sprintf "= %s" (printAliasName x)
+    | NotEqual x -> sprintf "<> %s" (printAliasName x)
+    | Between (x,y) -> sprintf "BETWEEN %s AND %s" (printAliasName x) (printAliasName y)
 
 let joinClauseToString (jc : Filter) = 
     let name = printAliasName jc.Name

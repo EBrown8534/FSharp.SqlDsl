@@ -12,7 +12,7 @@ open Types
 let query = {
     Query.Type = 
         Select { 
-            What = Columns [|Name (Raw "OrderId"); Name (Alias (Name (Raw "PoNumber"), "PurchaseOrderNumber")); Name (Alias (Name (Raw "Customer"), "CustomerName"))|]
+            What = Columns [|Name (Raw "OrderId"); Name (Alias (Name (Raw "PoNumber"), "PurchaseOrderNumber")); Name (Alias (Qualified ("Customer", "Name"), "CustomerName"))|]
             Limit = None
             Group = None
             Sort = None
