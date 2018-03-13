@@ -16,7 +16,12 @@ let query = {
             Limit = None
             Group = None
             Sort = None
-            Include = [] }
+            Include = 
+                [{
+                    Name = Alias (Name (Raw "Customers"), "Customer")
+                    Type = Inner
+                    On = [{Filter.Name = Qualified("Customer", "Id"); Clause = Equal (Qualified ("Order", "CustomerId"));}]
+                }]}
     Table = Raw "OrderItems" }
 let queryStr = query |> Generation.query
 printfn "%s" queryStr

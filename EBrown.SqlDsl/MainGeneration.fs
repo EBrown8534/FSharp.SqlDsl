@@ -63,6 +63,30 @@ let rec printName f n = match n with | Raw n -> n |> f | Alias (n, a) -> sprintf
 and printAliasName n = match n with | Qualified (n1, n2) -> sprintf "%s.%s" (n1 |> quoteName) (n2 |> quoteName) | Name n -> n |> printName quoteName | Func n -> n |> printName id
 let printSort s = match s with | Ascending n -> sprintf "%s ASC" (n |> quoteName) | Descending n -> sprintf "%s DESC" (n |> quoteName)
 
+let joinTypeToString jt =
+    match jt with
+        | Left -> "LEFT"
+        | Right -> "RIGHT"
+        | Outer -> "OUTER"
+        | Inner -> "INNER"
+
+let filterClauseToString fc = 
+    match fc with
+        | Equal x -> sprintf "= %s" (printAliasName x)
+        | NotEqual x -> sprintf "!= %s" (printAliasName x)
+        | Between (x,y) -> sprintf "BETWEEN %s AND %s" (printAliasName x) (printAliasName y)
+
+let joinClauseToString (jc : Filter) = 
+    let name = printAliasName jc.Name
+    let clause = filterClauseToString jc.Clause
+    sprintf "%s %s" name clause
+
+let joinToString (jl : Join) =
+    let n = jl.Name |> printName quoteName
+    let t = jl.Type |> joinTypeToString
+    let c = jl.On |> List.map (joinClauseToString) |> joinStrings ", "
+    sprintf "%s JOIN %s ON %s" t n c
+
 let printSelectQuery t s =
     let str = "SELECT"
     let str = match s.Limit with | None -> str | Some c -> sprintf "%s TOP %i" str c
@@ -70,4 +94,5 @@ let printSelectQuery t s =
     let str = sprintf "%s FROM %s" str (t |> printName quoteName)
     let str = match s.Group with | None -> str | Some g -> sprintf "%s GROUP BY %s" str (g |> Array.map quoteName |> joinStrings ", ")
     let str = match s.Sort with | None -> str | Some s -> sprintf "%s ORDER BY %s" str (s |> Array.map printSort |> joinStrings ", ")
+    let str = sprintf "%s %s" str (s.Include |> List.map joinToString |> joinStrings " ")
     str
