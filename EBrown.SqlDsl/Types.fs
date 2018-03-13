@@ -1,4 +1,5 @@
 ﻿module EBrown.SqlDsl.Types
+
 type VarSize = | Size of int | Max
 type XmlType = | Content | Document
 type TimeScale = | S0 | S1 | S2 | S3 | S4 | S5 | S6 | S7
@@ -27,8 +28,8 @@ and AliasNameFunc = | Qualified of string * string | Name of AliasName | Func of
 type Table = { Name : string; KeyColumns : SqlColumn array; Columns : SqlColumn array; Relationships : Relationship list }
 type SelectWhat = | Everything | Columns of AliasNameFunc array
 type SortDirection = | Ascending of string | Descending of string
-type FilterClause = | Equal of string | NotEqual of string | Between of string * string
-type Filter = { Name : string; Clause : FilterClause }
+type FilterClause = | Equal of AliasNameFunc | NotEqual of AliasNameFunc | Between of AliasNameFunc * AliasNameFunc
+type Filter = { Name : AliasNameFunc; Clause : FilterClause }
 type JoinType = | Left | Right | Outer | Inner
 type Join = { Type : JoinType; Name : AliasName; On : Filter list }
 type SelectQuery = { What : SelectWhat; Limit : int option; Group : string array option; Sort : SortDirection array option; Include : Join list }
