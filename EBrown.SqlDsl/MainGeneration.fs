@@ -59,8 +59,8 @@ let columnToString (sqlType : SqlColumn) =
         match sqlType.Default with | None -> "" | Some s -> s |> getDefaultString
     sprintf "%s %s %s%s" nameStr (typeStr.ToUpper()) nullStr defaultStr
 
-let printName f n = match n with | Raw n -> n |> f | Alias (n, a) -> sprintf "%s AS %s" (n |> f) (a |> quoteName)
-let printAliasName n = match n with | Qualified (n1, n2) -> sprintf "%s.%s" (n1 |> quoteName) (n2 |> quoteName) | Name n -> n |> printName quoteName | Func n -> n |> printName id
+let rec printName f n = match n with | Raw n -> n |> f | Alias (n, a) -> sprintf "%s AS %s" (n |> printAliasName) (a |> quoteName)
+and printAliasName n = match n with | Qualified (n1, n2) -> sprintf "%s.%s" (n1 |> quoteName) (n2 |> quoteName) | Name n -> n |> printName quoteName | Func n -> n |> printName id
 let printSort s = match s with | Ascending n -> sprintf "%s ASC" (n |> quoteName) | Descending n -> sprintf "%s DESC" (n |> quoteName)
 
 let printSelectQuery t s =
