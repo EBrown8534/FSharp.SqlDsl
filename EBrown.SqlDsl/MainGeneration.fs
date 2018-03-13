@@ -92,7 +92,7 @@ let printSelectQuery t s =
     let str = match s.Limit with | None -> str | Some c -> sprintf "%s TOP %i" str c
     let str = match s.What with | Everything -> sprintf "%s *" str | Columns c -> sprintf "%s %s" str (c |> Array.map printAliasName |> joinStrings ", ")
     let str = sprintf "%s FROM %s" str (t |> printName quoteName)
+    let str = sprintf "%s %s" str (s.Include |> List.map joinToString |> joinStrings " ")
     let str = match s.Group with | None -> str | Some g -> sprintf "%s GROUP BY %s" str (g |> Array.map quoteName |> joinStrings ", ")
     let str = match s.Sort with | None -> str | Some s -> sprintf "%s ORDER BY %s" str (s |> Array.map printSort |> joinStrings ", ")
-    let str = sprintf "%s %s" str (s.Include |> List.map joinToString |> joinStrings " ")
     str
