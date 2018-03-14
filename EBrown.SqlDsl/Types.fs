@@ -28,10 +28,18 @@ and AliasNameFunc = | Qualified of string * string | Name of AliasName | Func of
 type Table = { Name : string; KeyColumns : SqlColumn array; Columns : SqlColumn array; Relationships : Relationship list }
 type SelectWhat = | Everything | Columns of AliasNameFunc array
 type SortDirection = | Ascending of string | Descending of string
-type FilterClause = | Equal of AliasNameFunc | NotEqual of AliasNameFunc | Between of AliasNameFunc * AliasNameFunc
+
+type FilterClause =
+    | Equal of AliasNameFunc
+    | NotEqual of AliasNameFunc
+    | Between of AliasNameFunc * AliasNameFunc
+    | GreaterThan of AliasNameFunc
+    | LessThan of AliasNameFunc
 type Filter = { Name : AliasNameFunc; Clause : FilterClause }
+
 type JoinType = | Left | Right | Outer | Inner
 type Join = { Type : JoinType; Name : AliasName; On : Filter list }
+
 type SelectQuery = { What : SelectWhat; Limit : int option; Group : string array option; Sort : SortDirection array option; Include : Join list }
 type QueryType = | Select of SelectQuery
 type Query = { Type : QueryType; Table : AliasName }

@@ -75,6 +75,8 @@ let filterClauseToString fc =
     | Equal x -> sprintf "= %s" (printAliasName x)
     | NotEqual x -> sprintf "<> %s" (printAliasName x)
     | Between (x,y) -> sprintf "BETWEEN %s AND %s" (printAliasName x) (printAliasName y)
+    | GreaterThan x -> sprintf "> %s" (printAliasName x)
+    | LessThan x -> sprintf "< %s" (printAliasName x)
 
 let joinClauseToString (jc : Filter) = 
     let name = printAliasName jc.Name
