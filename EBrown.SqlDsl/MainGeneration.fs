@@ -12,6 +12,13 @@ let quoteName n = sprintf "[%s]" n
 let joinStrings sep (strs : string seq) = System.String.Join(sep, strs)
 let joinFilterStrings sep (strs : string seq) = System.String.Join(sep, strs |> Seq.filter (System.String.IsNullOrEmpty >> not))
 
+let argToStr a = match a with | String s -> sprintf "'%s'" s | Integer i -> sprintf "%i" i | Number f -> sprintf "%f" f
+let getStandardFunctionName fn = match fn with | SysUtcDateTime -> "SYSUTCDATETIME()" | GetDate -> "GETDATE()"
+let functionToString (f : Function) = 
+    match f with
+    | Function.Standard s -> sprintf "%s" (s |> getStandardFunctionName)
+    | Custom (s, a) -> sprintf "%s(%s)" (s |> quoteName) (a |> Array.map argToStr |> joinStrings ", ")
+
 let columnToString (sqlType : SqlColumn) =
     let nameStr = sqlType.Name |> quoteName
     let typeStr =
@@ -46,16 +53,11 @@ let columnToString (sqlType : SqlColumn) =
         | UniqueIdentifier -> "uniqueidentifier"
     let nullStr = if sqlType.Nullable then "NULL" else "NOT NULL"
     let defaultStr =
-        let argToStr a = match a with | String s -> sprintf "'%s'" s | Integer i -> sprintf "%i" i | Number f -> sprintf "%f" f
-        let getStandardFunctionName fn = match fn with | SysUtcDateTime -> "SYSUTCDATETIME()" | GetDate -> "GETDATE()"
         let getDefaultString s =
             match s with
             | Value a -> sprintf " DEFAULT %s" (a |> argToStr)
             | Identity (s, i) -> sprintf " IDENTITY(%i, %i)" s i
-            | Function f ->
-                match f with
-                | Function.Standard s -> sprintf " DEFAULT %s" (s |> getStandardFunctionName)
-                | Custom (s, a) -> sprintf " DEFAULT %s(%s)" (s |> quoteName) (a |> Array.map argToStr |> joinStrings ", ")
+            | Function f -> sprintf " DEFAULT %s" (f |> functionToString)
         match sqlType.Default with | None -> "" | Some s -> s |> getDefaultString
     sprintf "%s %s %s%s" nameStr (typeStr.ToUpper()) nullStr defaultStr
 
@@ -89,12 +91,17 @@ let joinToString (jl : Join) =
     let c = jl.On |> List.map (joinClauseToString) |> joinStrings ", "
     sprintf "%s JOIN %s ON %s" t n c
 
+let nameFunctionToString (nf : NameFunction) =
+    match nf with
+    | ColumnName x -> x
+    | SqlFunction f -> functionToString f
+
 let printSelectQuery t s =
     let str = "SELECT"
     let str = match s.Limit with | None -> str | Some c -> sprintf "%s TOP %i" str c
     let str = match s.What with | Everything -> sprintf "%s *" str | Columns c -> sprintf "%s %s" str (c |> Array.map printAliasName |> joinStrings ", ")
     let str = sprintf "%s FROM %s" str (t |> printName quoteName)
-    let str = sprintf "%s %s" str (s.Include |> List.map joinToString |> joinStrings " ")
-    let str = match s.Group with | None -> str | Some g -> sprintf "%s GROUP BY %s" str (g |> Array.map quoteName |> joinStrings ", ")
+    let str = match s.Include with | None -> str | Some g -> sprintf "%s %s" str (g |> List.map joinToString |> joinStrings " ")
+    let str = match s.Group with | None -> str | Some g -> sprintf "%s GROUP BY %s" str (g |> List.map nameFunctionToString |> joinStrings ", ")
     let str = match s.Sort with | None -> str | Some s -> sprintf "%s ORDER BY %s" str (s |> Array.map printSort |> joinStrings ", ")
     str
