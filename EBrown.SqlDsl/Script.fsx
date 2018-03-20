@@ -14,9 +14,9 @@ let query = {
         Select { 
             What = Columns [|Name (Raw "OrderId"); Name (Alias (Name (Raw "PoNumber"), "PurchaseOrderNumber")); Name (Alias (Qualified ("Customer", "Name"), "CustomerName"))|]
             Limit = None
-            Group = None
+            Group = Some [(ColumnName "Name"); (ColumnName "Testing"); (SqlFunction (Standard (SysUtcDateTime)))]
             Sort = None
-            Include = 
+            Include = Some
                 [{
                     Name = Alias (Name (Raw "Customers"), "Customer")
                     Type = Inner

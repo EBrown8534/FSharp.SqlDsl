@@ -29,6 +29,8 @@ type Table = { Name : string; KeyColumns : SqlColumn array; Columns : SqlColumn 
 type SelectWhat = | Everything | Columns of AliasNameFunc array
 type SortDirection = | Ascending of string | Descending of string
 
+type NameFunction = | ColumnName of string | SqlFunction of Function
+
 type FilterClause =
     | Equal of AliasNameFunc
     | NotEqual of AliasNameFunc
@@ -40,6 +42,6 @@ type Filter = { Name : AliasNameFunc; Clause : FilterClause }
 type JoinType = | Left | Right | Outer | Inner
 type Join = { Type : JoinType; Name : AliasName; On : Filter list }
 
-type SelectQuery = { What : SelectWhat; Limit : int option; Group : string array option; Sort : SortDirection array option; Include : Join list }
+type SelectQuery = { What : SelectWhat; Limit : int option; Group : NameFunction list option; Sort : SortDirection array option; Include : Join list option}
 type QueryType = | Select of SelectQuery
 type Query = { Type : QueryType; Table : AliasName }
